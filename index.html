@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quaystone Pay | Bills, top-ups and parcels at your local shop</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="quaystone-chat.css">
+<style>
+  :root {
+    --forest: #1F4D3A; --forest-2: #2E6B52; --forest-dark: #153728;
+    --gold: #D4AF37; --gold-soft: #FBF4DD; --ink: #1B2420; --muted: #5A6B62; --line: #DCE5DF; --bg: #F3F6F2;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", Arial, Helvetica, sans-serif; color: var(--ink); background: #fff; line-height: 1.5; }
+  a { color: inherit; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 12px 22px;
+         font: inherit; font-weight: 700; cursor: pointer; text-decoration: none; }
+  .btn-gold { background: var(--gold); color: var(--forest-dark); }
+  .btn-gold:hover { background: #E2C254; }
+  .btn-ghost { background: transparent; color: #fff; box-shadow: inset 0 0 0 2px rgba(255,255,255,.6); }
+  .btn-ghost:hover { box-shadow: inset 0 0 0 2px #fff; }
+  .btn-forest { background: var(--forest); color: #fff; }
+  .btn-forest:hover { background: var(--forest-2); }
+
+  .incident { display: none; background: var(--gold-soft); border-bottom: 1px solid #EAD9A0; color: var(--forest-dark); font-size: 14px; }
+  .incident.show { display: block; }
+  .incident .wrap { display: flex; gap: 10px; align-items: center; padding-top: 10px; padding-bottom: 10px; }
+  .incident strong { white-space: nowrap; }
+
+  header { background: var(--forest); color: #fff; position: sticky; top: 0; z-index: 10; }
+  header .wrap { display: flex; align-items: center; gap: 28px; height: 72px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; letter-spacing: .2px; text-decoration: none; }
+  .logo span { color: var(--gold); }
+  nav { display: flex; gap: 22px; font-size: 15px; flex: 1; }
+  nav a { text-decoration: none; opacity: .9; }
+  nav a:hover { opacity: 1; text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 6px; }
+  .header-actions { display: flex; gap: 10px; }
+  .header-actions .btn { padding: 9px 16px; font-size: 14px; }
+
+  .hero { background: linear-gradient(120deg, var(--forest-dark) 0%, var(--forest) 55%, var(--forest-2) 100%); color: #fff; overflow: hidden; }
+  .hero .wrap { display: grid; grid-template-columns: 1.15fr .85fr; gap: 48px; align-items: center; padding-top: 64px; padding-bottom: 72px; }
+  .eyebrow { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+  .hero h1 { font-size: 46px; line-height: 1.12; margin: 0 0 18px; }
+  .hero h1 em { font-style: normal; color: var(--gold); }
+  .hero p.lead { font-size: 19px; opacity: .92; margin: 0 0 28px; max-width: 560px; }
+  .finder { display: flex; background: #fff; border-radius: 999px; padding: 6px; max-width: 520px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+  .finder input { flex: 1; border: 0; outline: none; font: inherit; font-size: 16px; padding: 0 18px; border-radius: 999px; color: var(--ink); min-width: 0; }
+  .hero-links { margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .receipt { background: #fff; color: var(--ink); border-radius: 14px; padding: 22px 24px; width: 320px; margin-left: auto;
+             box-shadow: 0 24px 50px rgba(0,0,0,.28); transform: rotate(2.5deg); font-family: "Courier New", monospace; font-size: 14px; position: relative; }
+  .receipt::after { content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 10px;
+                    background: radial-gradient(circle at 8px 0, #fff 7px, transparent 8px) repeat-x; background-size: 16px 10px; }
+  .receipt .r-brand { font-family: "Segoe UI", Arial, sans-serif; font-weight: 800; color: var(--forest); font-size: 18px; display: flex; align-items: center; gap: 8px; }
+  .receipt .r-row { display: flex; justify-content: space-between; padding: 3px 0; }
+  .receipt hr { border: 0; border-top: 1px dashed #B9C6BE; margin: 12px 0; }
+  .receipt .r-ref { background: var(--gold-soft); border-radius: 6px; padding: 6px 8px; font-weight: 700; margin-top: 8px; }
+  .receipt .r-total { font-weight: 700; font-size: 16px; }
+
+  section { padding: 72px 0; }
+  .section-head { max-width: 640px; margin-bottom: 36px; }
+  .section-head h2 { font-size: 32px; margin: 0 0 10px; color: var(--forest-dark); }
+  .section-head p { color: var(--muted); font-size: 17px; margin: 0; }
+
+  .services { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .service { border: 1px solid var(--line); border-radius: 16px; padding: 24px; background: #fff; transition: transform .15s, box-shadow .15s; }
+  .service:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(31,77,58,.12); }
+  .service .icon { width: 48px; height: 48px; border-radius: 12px; background: var(--gold-soft); display: grid; place-items: center; margin-bottom: 14px; }
+  .service h3 { margin: 0 0 6px; font-size: 19px; color: var(--forest-dark); }
+  .service p { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
+  .service a { font-weight: 700; color: var(--forest); text-decoration: none; font-size: 15px; cursor: pointer; }
+  .service a:hover { text-decoration: underline; }
+
+  .track { background: var(--bg); }
+  .track .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+  .steps li { display: flex; gap: 14px; background: #fff; border-radius: 14px; padding: 16px 18px; border: 1px solid var(--line); }
+  .steps .num { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--forest); color: var(--gold); font-weight: 800; display: grid; place-items: center; }
+  .steps strong { display: block; color: var(--forest-dark); }
+  .steps span { color: var(--muted); font-size: 15px; }
+
+  .support { background: var(--forest); color: #fff; border-radius: 20px; padding: 40px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 36px; }
+  .support h2 { margin: 0 0 12px; font-size: 28px; }
+  .support p { opacity: .92; margin: 0 0 20px; }
+  .support ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+  .support li { background: rgba(255,255,255,.08); border-radius: 12px; padding: 12px 14px; font-size: 15px; }
+  .support li b { color: var(--gold); }
+
+  .retailers .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .stat { border-radius: 16px; padding: 22px; background: var(--gold-soft); }
+  .stat b { display: block; font-size: 30px; color: var(--forest-dark); }
+  .stat span { color: var(--muted); font-size: 14px; }
+  .ticks { list-style: none; padding: 0; margin: 0 0 24px; display: grid; gap: 10px; }
+  .ticks li { padding-left: 30px; position: relative; }
+  .ticks li::before { content: ""; position: absolute; left: 0; top: 4px; width: 18px; height: 18px; border-radius: 50%; background: var(--gold);
+                      -webkit-mask: none; box-shadow: inset 0 0 0 5px var(--gold); }
+  .ticks li::after { content: ""; position: absolute; left: 6px; top: 7px; width: 5px; height: 9px; border: solid var(--forest-dark); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+
+  footer { background: var(--forest-dark); color: #CFE0D6; padding: 48px 0 28px; font-size: 14px; }
+  footer .cols { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; margin-bottom: 32px; }
+  footer h4 { color: #fff; margin: 0 0 12px; font-size: 15px; }
+  footer ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  footer a { text-decoration: none; }
+  footer a:hover { color: #fff; }
+  .disclaimer { border-top: 1px solid rgba(255,255,255,.12); padding-top: 20px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; opacity: .8; }
+
+  @media (max-width: 900px) {
+    nav, .header-actions .btn-ghost { display: none; }
+    .hero .wrap, .track .wrap, .retailers .wrap, .support { grid-template-columns: 1fr; }
+    .receipt { margin: 10px auto 0; }
+    .services { grid-template-columns: 1fr 1fr; }
+    footer .cols { grid-template-columns: 1fr 1fr; }
+    .hero h1 { font-size: 36px; }
+  }
+  @media (max-width: 560px) { .services { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="incident" id="incident" role="status">
+  <div class="wrap">
+    <strong>Retailer service update:</strong>
+    <span>We're aware of an issue affecting card payments at some Quaystone Pay stores. Our engineers are working to fix it as quickly as possible.</span>
+  </div>
+</div>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="#" aria-label="Quaystone Pay home">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+        <path d="M5 30V15a12 12 0 0 1 24 0v15h-7V15a5 5 0 0 0-10 0v15z" fill="#D4AF37"/>
+        <path d="M14 6h6l-1 6h-4z" fill="#fff"/>
+      </svg>
+      Quaystone<span>Pay</span>
+    </a>
+    <nav aria-label="Main">
+      <a href="#services">Pay a bill</a>
+      <a href="#services">Energy top-ups</a>
+      <a href="#services">Parcels</a>
+      <a href="#track">Track a payment</a>
+      <a href="#retailers">For retailers</a>
+    </nav>
+    <div class="header-actions">
+      <a class="btn btn-ghost" href="#retailers">Retailer login</a>
+      <button class="btn btn-gold" data-chat type="button">Chat to us</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Bills, top-ups and parcels</span>
+        <h1>Everyday payments, <em>sorted</em> at your local shop.</h1>
+        <p class="lead">Pay household bills, top up your gas and electricity, and send or collect parcels at thousands of Quaystone Pay stores, many open early until late.</p>
+        <form class="finder" id="finder" role="search" aria-label="Find a store">
+          <input id="postcode" type="text" placeholder="Enter your postcode, for example LS1 4AP" aria-label="Postcode" autocomplete="postal-code">
+          <button class="btn btn-forest" type="submit">Find a store</button>
+        </form>
+        <div class="hero-links">
+          <button class="btn btn-ghost" data-chat type="button">Where's my bill payment?</button>
+          <button class="btn btn-ghost" data-chat type="button">I'm a Quaystone Pay retailer</button>
+        </div>
+      </div>
+      <div aria-hidden="true">
+        <div class="receipt">
+          <div class="r-brand">
+            <svg width="20" height="20" viewBox="0 0 34 34"><path d="M5 30V15a12 12 0 0 1 24 0v15h-7V15a5 5 0 0 0-10 0v15z" fill="#D4AF37"/></svg>
+            Quaystone Pay
+          </div>
+          <div style="color:#5A6B62;margin-top:4px">Patel's News, Kirkgate, Leeds</div>
+          <hr>
+          <div class="r-row"><span>Council tax</span><span>Westshire</span></div>
+          <div class="r-row"><span>Date</span><span>16/11/2026 14:32</span></div>
+          <div class="r-row r-total"><span>Amount</span><span>&pound;120.00</span></div>
+          <div class="r-ref">Receipt ref: 281123</div>
+          <hr>
+          <div style="font-size:12px;color:#5A6B62">Please keep this receipt as proof of payment.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="services">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>What you can do at a Quaystone Pay store</h2>
+        <p>No account needed. Just bring your bill, card or barcode, and keep your receipt.</p>
+      </div>
+      <div class="services">
+        <div class="service">
+          <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1F4D3A" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div>
+          <h3>Pay household bills</h3>
+          <p>Council tax, water, rent, TV licence and more, paid in cash or by card.</p>
+          <a data-chat>Ask about a bill &rarr;</a>
+        </div>
+        <div class="service">
+          <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1F4D3A" stroke-width="2"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></div>
+          <h3>Energy top-ups</h3>
+          <p>Top up a gas card, electricity key or smart meter, from as little as &pound;1.</p>
+          <a data-chat>Find a top-up store &rarr;</a>
+        </div>
+        <div class="service">
+          <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1F4D3A" stroke-width="2"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg></div>
+          <h3>Parcel collection</h3>
+          <p>Send, return and collect parcels at a store near you, with long opening hours.</p>
+          <a data-chat>Find a parcel store &rarr;</a>
+        </div>
+        <div class="service">
+          <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1F4D3A" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <h3>Cash Out vouchers</h3>
+          <p>Received a voucher by text or email? Cash it in store before it expires.</p>
+          <a data-chat>Voucher help &rarr;</a>
+        </div>
+        <div class="service">
+          <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1F4D3A" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></div>
+          <h3>Mobile top-ups</h3>
+          <p>Add credit to any major UK mobile network while you shop.</p>
+          <a data-chat>Ask a question &rarr;</a>
+        </div>
+        <div class="service">
+          <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1F4D3A" stroke-width="2"><path d="M3 10h18M5 10V20h14V10M3 10l2-6h14l2 6"/></svg></div>
+          <h3>Bank cash deposits</h3>
+          <p>Pay cash into your bank account at selected stores, with an instant receipt.</p>
+          <a data-chat>Find a store &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="track" id="track">
+    <div class="wrap">
+      <div>
+        <div class="section-head">
+          <h2>Where's my bill payment?</h2>
+          <p>If the company you paid says they haven't received your payment, our virtual assistant can trace it in seconds, any time of day.</p>
+        </div>
+        <button class="btn btn-forest" data-chat type="button">Track a payment in chat</button>
+      </div>
+      <ol class="steps">
+        <li><span class="num">1</span><div><strong>Find your receipt</strong><span>The reference number is printed on your Quaystone Pay receipt.</span></div></li>
+        <li><span class="num">2</span><div><strong>Chat to our assistant</strong><span>Share the reference and we'll tell you when we sent your payment.</span></div></li>
+        <li><span class="num">3</span><div><strong>Quote it to the company you paid</strong><span>They can use your receipt reference to find and apply the payment.</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="support">
+    <div class="wrap">
+      <div class="support">
+        <div>
+          <h2>Finding it hard to pay your bills?</h2>
+          <p>You're not alone, and you don't have to sort it out on your own. Our Consumer Support team can talk things through with you and point you to help, including charity fuel vouchers and your council's hardship support.</p>
+          <button class="btn btn-gold" data-chat type="button">Talk to us in confidence</button>
+        </div>
+        <ul>
+          <li><b>Energy:</b> ask your supplier about emergency credit and their Priority Services Register.</li>
+          <li><b>Council tax and water:</b> contact them early about payment plans and discounts.</li>
+          <li><b>Free debt advice:</b> StepChange, National Debtline, Citizens Advice and MoneyHelper.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="retailers" id="retailers" style="background:var(--bg)">
+    <div class="wrap">
+      <div>
+        <div class="section-head">
+          <h2>Run a Quaystone Pay store</h2>
+          <p>Bring more customers through your door and earn commission on every transaction.</p>
+        </div>
+        <ul class="ticks">
+          <li>Card payments, bill payments, parcels and top-ups on one terminal</li>
+          <li>Live monitoring that spots problems before you notice them</li>
+          <li>24/7 support from our virtual assistant and retailer teams</li>
+        </ul>
+        <button class="btn btn-forest" data-chat type="button">Get retailer support</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>1,000s</b><span>of stores across the UK</span></div>
+        <div class="stat"><b>24/7</b><span>virtual assistant support</span></div>
+        <div class="stat"><b>3 days</b><span>voucher settlement</span></div>
+        <div class="stat"><b>1</b><span>terminal for every service</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <a class="logo" href="#" style="color:#fff">
+          <svg width="28" height="28" viewBox="0 0 34 34" aria-hidden="true"><path d="M5 30V15a12 12 0 0 1 24 0v15h-7V15a5 5 0 0 0-10 0v15z" fill="#D4AF37"/></svg>
+          Quaystone<span>Pay</span>
+        </a>
+        <p style="margin-top:12px;max-width:280px">Everyday payments at your local shop.</p>
+      </div>
+      <div><h4>Customers</h4><ul><li><a href="#services">Pay a bill</a></li><li><a href="#services">Energy top-ups</a></li><li><a href="#track">Track a payment</a></li><li><a href="#support">Help with bills</a></li></ul></div>
+      <div><h4>Retailers</h4><ul><li><a href="#retailers">Become a retailer</a></li><li><a href="#retailers">Terminal support</a></li><li><a href="#retailers">Settlements</a></li></ul></div>
+      <div><h4>Contact</h4><ul><li><a data-chat href="#">Chat to us</a></li><li><a href="#">help@quaystonepay.example</a></li><li><a data-chat href="#">Make a complaint</a></li></ul></div>
+    </div>
+    <div class="disclaimer">
+      <span>Quaystone Pay is a fictional company created for product demonstrations. Any resemblance to a real company is coincidental.</span>
+      <span>&copy; 2026 Quaystone Pay (demo)</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var params = new URLSearchParams(location.search);
+    if (params.get("incident") === "1") document.getElementById("incident").classList.add("show");
+    function openChat(e) {
+      if (e) e.preventDefault();
+      if (window.QuaystoneChat) window.QuaystoneChat.open();
+    }
+    document.querySelectorAll("[data-chat]").forEach(function (node) { node.addEventListener("click", openChat); });
+    document.getElementById("finder").addEventListener("submit", openChat);
+  })();
+</script>
+<script>
+  window.PP_CHAT_CONFIG = {
+    environment: "prod-euw2",
+    deploymentId: ""
+  };
+</script>
+<script src="quaystone-chat-faqs.js"></script>
+<script src="quaystone-chat.js"></script>
+</body>
+</html>

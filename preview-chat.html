@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quaystone Pay chat preview (offline)</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="quaystone-chat.css">
+<style>
+  body { margin: 0; min-height: 100vh; font-family: Arial, sans-serif; background: linear-gradient(135deg, #153728 0%, #1F4D3A 60%, #D4AF37 160%); }
+  .note { color: #fff; padding: 32px; max-width: 520px; font-size: 15px; line-height: 1.5; }
+  .note h1 { color: #D4AF37; margin: 0 0 8px; }
+  #ppc-panel { transition: none !important; }
+</style>
+</head>
+<body>
+<div class="note">
+  <h1>Quaystone Pay chat preview</h1>
+  Offline backup of the event demo. It replays the customer journey with canned replies and doesn't connect to Genesys Cloud.
+  Add <code>#help</code> to the address to open on Help topics, or <code>#manual</code> to type the journey yourself.
+</div>
+<script>
+  // Stand-in for Genesys Messenger so the UI can be shown without a deployment or a network connection.
+  (function () {
+    var subs = {};
+    var t = Date.now();
+    function bot(text, human, name) {
+      t += 4000;
+      return { id: "m" + t, direction: "Outbound", type: "Text", text: text, originatingEntity: human ? "Human" : "Bot",
+               channel: { time: new Date(t).toISOString(), from: { nickname: name || "Quaystone Pay" } } };
+    }
+    var replies = [
+      [/job|afford|struggl|christmas/i, "I'm really sorry to hear that. Times can be really tough, and you don't have to sort this out on your own. Let me pass you to one of my colleagues, who can talk things through with you and see how Quaystone Pay can help."],
+      [/281\s?123|council/i, "I've found your council tax payment of £120.00 to Westshire Council, made at Patel's News, Kirkgate, Leeds on Monday 16 November 2026 at 2:32pm. Quaystone Pay sent this to Westshire Council on Tuesday 17 November 2026. I suggest you quote your receipt reference to Westshire Council so they can find the payment, and please keep your receipt as proof of payment. Is there anything else I can help you with?"],
+      [/customer/i, "Thanks. What can I help you with today?"],
+      [/LS1|store|top up/i, "The nearest store where you can top up your electricity is Patel's News, 14 Kirkgate, Leeds LS1 6BY. It's 0.3 miles away and open 6am to 10pm every day. Would you like me to text you the address and opening hours? I can also share details of other nearby stores if you'd prefer."],
+      [/07\d|\+44/, "I've sent that text to you now with the store details. Is there anything else I can help you with?"],
+      [/yes/i, "What mobile number would you like the text sent to?"],
+      [/no|that's all/i, "Thanks for contacting Quaystone Pay. Have a great day."]
+    ];
+    window.Genesys = function (kind, name, payload, ok) {
+      if (kind === "subscribe") {
+        (subs[name] = subs[name] || []).push(payload);
+        if (name === "MessagingService.ready") setTimeout(payload, 50);
+        return;
+      }
+      if (name === "MessagingService.startConversation") {
+        setTimeout(function () { emit([bot("Hello, and thanks for contacting Quaystone Pay. So I can help you today, could you let me know whether you're a Quaystone Pay retailer or a customer?")]); }, 700);
+      }
+      if (name === "MessagingService.sendMessage") {
+        var text = payload.message;
+        emit([{ id: "u" + Date.now(), direction: "Inbound", type: "Text", text: text, channel: { time: new Date().toISOString() } }]);
+        var match = replies.find(function (r) { return r[0].test(text); });
+        if (match) setTimeout(function () { emit([bot(match[1])]); }, 900);
+        if (match && /pass you to one of my colleagues/.test(match[1])) {
+          setTimeout(function () { emit([bot("Hi, I'm Sam from the Quaystone Pay Consumer Support team. Thank you for telling us what's going on. I'm sorry things are so hard at the moment. Let's see what we can do together.", true, "Sam")]); }, 4000);
+        }
+      }
+      if (typeof ok === "function") ok();
+    };
+    function emit(messages) {
+      (subs["MessagingService.messagesReceived"] || []).forEach(function (cb) { cb({ data: { messages: messages } }); });
+    }
+  })();
+  window.PP_CHAT_CONFIG = { environment: "prod-euw2", deploymentId: "offline-preview", bootstrapUrl: "about:blank", transport: "messenger" };
+</script>
+<script src="quaystone-chat-faqs.js"></script>
+<script src="quaystone-chat.js"></script>
+<script>
+  var steps = [
+    "I'm a customer",
+    "The council say they haven't got my council tax payment, the reference is 281123",
+    "Can you find me a store where I can top up my electricity? LS1 4AP",
+    "Yes please, text it to 07700 900123",
+    "I've just been told I'm losing my job and I'm worried I won't be able to pay my bills over Christmas"
+  ];
+  if (location.hash === "#manual" || location.hash === "#help") steps = [];
+  if (location.hash === "#payment") steps = steps.slice(0, 2);
+  if (location.hash === "#store") steps = steps.slice(0, 3);
+  setTimeout(function () {
+    window.QuaystoneChat.open();
+    if (location.hash === "#help") {
+      document.querySelectorAll(".ppc-tab")[1].click();
+      document.querySelector(".ppc-faq-q").click();
+      return;
+    }
+    steps.forEach(function (s, i) {
+      setTimeout(function () {
+        var input = document.querySelector(".ppc-composer textarea");
+        input.value = s;
+        document.querySelector(".ppc-composer").dispatchEvent(new Event("submit", { cancelable: true }));
+      }, 1500 + i * 2400);
+    });
+  }, 300);
+</script>
+</body>
+</html>
