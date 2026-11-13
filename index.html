@@ -49,15 +49,19 @@
   .finder input { flex: 1; border: 0; outline: none; font: inherit; font-size: 16px; padding: 0 18px; border-radius: 999px; color: var(--ink); min-width: 0; }
   .hero-links { margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap; }
 
-  .receipt { background: #fff; color: var(--ink); border-radius: 14px; padding: 22px 24px; width: 320px; margin-left: auto;
-             box-shadow: 0 24px 50px rgba(0,0,0,.28); transform: rotate(2.5deg); font-family: "Courier New", monospace; font-size: 14px; position: relative; }
-  .receipt::after { content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 10px;
-                    background: radial-gradient(circle at 8px 0, #fff 7px, transparent 8px) repeat-x; background-size: 16px 10px; }
-  .receipt .r-brand { font-family: "Segoe UI", Arial, sans-serif; font-weight: 800; color: var(--forest); font-size: 18px; display: flex; align-items: center; gap: 8px; }
-  .receipt .r-row { display: flex; justify-content: space-between; padding: 3px 0; }
-  .receipt hr { border: 0; border-top: 1px dashed #B9C6BE; margin: 12px 0; }
-  .receipt .r-ref { background: var(--gold-soft); border-radius: 6px; padding: 6px 8px; font-weight: 700; margin-top: 8px; }
-  .receipt .r-total { font-weight: 700; font-size: 16px; }
+  .stores-card { background: #fff; color: var(--ink); border-radius: 18px; padding: 20px; width: 340px; margin-left: auto;
+                 box-shadow: 0 24px 50px rgba(0,0,0,.28); transform: rotate(1.5deg); }
+  .stores-card .s-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .stores-card .s-title { font-weight: 800; color: var(--forest-dark); font-size: 17px; display: flex; align-items: center; gap: 8px; }
+  .stores-card .s-near { font-size: 12px; font-weight: 700; color: var(--forest); background: var(--bg); border-radius: 999px; padding: 4px 10px; }
+  .stores-card .s-store { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-top: 10px; }
+  .stores-card .s-store:first-of-type { border-color: var(--gold); box-shadow: inset 4px 0 0 var(--gold); }
+  .stores-card .s-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .stores-card .s-name { font-weight: 700; color: var(--forest-dark); }
+  .stores-card .s-dist { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .stores-card .s-open { font-size: 13px; color: #2E7D32; font-weight: 700; margin-top: 2px; }
+  .stores-card .s-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .stores-card .s-tags span { font-size: 11px; background: var(--gold-soft); color: var(--forest-dark); border-radius: 999px; padding: 3px 8px; }
 
   main section { padding: 72px 0; }
   .section-head { max-width: 640px; margin-bottom: 36px; }
@@ -110,7 +114,7 @@
   @media (max-width: 900px) {
     nav, .header-actions .btn-ghost { display: none; }
     .hero .wrap, .track .wrap, .retailers .wrap, .support { grid-template-columns: 1fr; }
-    .receipt { margin: 10px auto 0; }
+    .stores-card { margin: 10px auto 0; }
     .services { grid-template-columns: 1fr 1fr; }
     footer .cols { grid-template-columns: 1fr 1fr; }
     .hero h1 { font-size: 36px; }
@@ -167,19 +171,29 @@
         </div>
       </div>
       <div aria-hidden="true">
-        <div class="receipt">
-          <div class="r-brand">
-            <svg width="20" height="20" viewBox="0 0 34 34"><path d="M5 30V15a12 12 0 0 1 24 0v15h-7V15a5 5 0 0 0-10 0v15z" fill="#D4AF37"/></svg>
-            Quaystone Pay
+        <div class="stores-card">
+          <div class="s-head">
+            <div class="s-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F4D3A" stroke-width="2.2"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              Stores near you
+            </div>
+            <span class="s-near">Leeds city centre</span>
           </div>
-          <div style="color:#5A6B62;margin-top:4px">Patel's News, Kirkgate, Leeds</div>
-          <hr>
-          <div class="r-row"><span>Council tax</span><span>Westshire</span></div>
-          <div class="r-row"><span>Date</span><span>16/11/2026 14:32</span></div>
-          <div class="r-row r-total"><span>Amount</span><span>&pound;120.00</span></div>
-          <div class="r-ref">Receipt ref: 281123</div>
-          <hr>
-          <div style="font-size:12px;color:#5A6B62">Please keep this receipt as proof of payment.</div>
+          <div class="s-store">
+            <div class="s-row"><span class="s-name">Patel's News</span><span class="s-dist">0.3 miles</span></div>
+            <div class="s-open">Open until 10pm</div>
+            <div class="s-tags"><span>Bill payments</span><span>Energy top-ups</span><span>Parcels</span></div>
+          </div>
+          <div class="s-store">
+            <div class="s-row"><span class="s-name">Allen's Convenience Store</span><span class="s-dist">0.5 miles</span></div>
+            <div class="s-open">Open until 9pm</div>
+            <div class="s-tags"><span>Bill payments</span><span>Energy top-ups</span><span>Card payments</span></div>
+          </div>
+          <div class="s-store">
+            <div class="s-row"><span class="s-name">City Express Mini Market</span><span class="s-dist">0.8 miles</span></div>
+            <div class="s-open">Open 24 hours</div>
+            <div class="s-tags"><span>Bill payments</span><span>Mobile top-ups</span><span>Parcels</span></div>
+          </div>
         </div>
       </div>
     </div>
